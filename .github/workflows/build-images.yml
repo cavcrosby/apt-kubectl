@@ -1,0 +1,35 @@
+---
+name: Build the container images
+
+on:
+  schedule:
+    - cron: "0 5 30 * *"
+  push:
+    paths:
+      - Dockerfile
+  workflow_dispatch: {}
+
+jobs:
+  docker-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: cavcrosby
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Build and push to Docker Hub
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: cavcrosby/apt-kubectl:latest
+
+      - name: Push the repository's README to Docker Hub
+        uses: peter-evans/dockerhub-description@v5
+        with:
+          username: cavcrosby
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          repository: cavcrosby/apt-kubectl
